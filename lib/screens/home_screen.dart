@@ -1,0 +1,107 @@
+import 'package:account/provider/transaction_provider.dart';
+import 'package:account/screens/edit_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:account/screens/Details.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          centerTitle: true,
+          title: const Text(
+            'ของสะสม',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.exit_to_app),
+              onPressed: () {
+                SystemNavigator.pop();
+              },
+            ),
+          ],
+        ),
+        body: Consumer(
+          builder: (context, TransactionProvider provider, Widget? child) {
+            if (provider.transactions.isEmpty) {
+              return const Center(
+                child: Text('ไม่มีรายการ'),
+              );
+            } else {
+              return ListView.builder(
+                itemCount: provider.transactions.length,
+                itemBuilder: (context, index) {
+                  var statement = provider.transactions[index];
+                  return Card(
+                    elevation: 10,
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 10),
+                    child: ListTile(
+                      title: Text(statement.title1),
+                      subtitle: Text(
+                          '${provider.transactions[index].title2} | ${provider.transactions[index].title3} | ${provider.transactions[index].title4} '),
+                      leading: CircleAvatar(
+                        radius: 40,
+                        backgroundColor: const Color.fromARGB(255, 212, 12, 12),
+                        child: FittedBox(
+                          child: Icon(Icons.person, color: Colors.white),
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Detail(
+                              transaction: statement,
+                            ),
+                          ),
+                        );
+                      },
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return EditScreen(statement: statement);
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              provider.deleteTransaction(statement.keyID);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+          },
+        ));
+  }
+}
